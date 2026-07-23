@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Pixi
+.pixi/
+pixi.lock
+
+# Experiment outputs
+runs/
+outputs/
+wandb/
+*.log
+examples/quickstart_output/
+/attribution/
+/diagnosis/
+
+# Large data (keep small bundled samples under data/sample/)
+data/*
+!data/sample/
+!data/README.md

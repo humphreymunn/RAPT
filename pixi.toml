@@ -1,0 +1,38 @@
+[project]
+name = "rapt"
+description = "RAPT: Model-Predictive OOD Detection and Failure Diagnosis"
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[dependencies]
+python = ">=3.9,<3.13"
+pytorch = ">=2.0"
+numpy = "*"
+scikit-learn = "*"
+matplotlib-base = "*"
+pyyaml = "*"
+tqdm = "*"
+
+[pypi-dependencies]
+rapt-ood = { path = ".", editable = true }
+
+[feature.onnx.dependencies]
+onnx = "*"
+onnxruntime = "*"
+
+[feature.llm.pypi-dependencies]
+anthropic = "*"
+openai = "*"
+
+[feature.dev.dependencies]
+pytest = "*"
+
+[environments]
+default = { solve-group = "default" }
+full = { features = ["onnx", "llm", "dev"], solve-group = "default" }
+
+[tasks]
+quickstart = "python examples/quickstart.py"
+make-data = "python scripts/make_synthetic_data.py --out data/sample"
+train = "python scripts/train.py data/sample/train.npz --out checkpoints/quickstart"
+evaluate = "python scripts/evaluate.py checkpoints/quickstart data/sample/eval.npz"

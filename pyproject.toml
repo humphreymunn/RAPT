@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rapt-ood"
+version = "1.0.0"
+description = "RAPT: Model-Predictive Out-of-Distribution Detection and Failure Diagnosis for Sim-to-Real Humanoid Deployment"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Humphrey Munn" }]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "torch>=2.0",
+    "scikit-learn",
+    "matplotlib",
+    "pyyaml",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+onnx = ["onnx", "onnxruntime"]
+llm = ["anthropic", "openai"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["rapt*"]

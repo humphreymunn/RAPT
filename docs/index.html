@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAPT: Model-Predictive OOD Detection and Failure Diagnosis for Sim-to-Real Humanoid Deployment</title>
+<meta name="description" content="RAPT is a lightweight self-supervised runtime monitor for 50 Hz humanoid control: calibrated per-dimension OOD detection, temporal saliency, and LLM-based root-cause diagnosis.">
+<meta property="og:title" content="RAPT: Model-Predictive OOD Detection and Failure Diagnosis for Sim-to-Real Humanoid Deployment">
+<meta property="og:description" content="Calibrated OOD detection and semantic failure diagnosis for sim-to-real humanoid deployment (arXiv:2602.01515).">
+<meta property="og:image" content="rapt_fig1.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+<style>
+  :root {
+    --text: #1a1a1a;
+    --muted: #555;
+    --accent: #35508c;
+    --accent-dark: #263a68;
+    --rule: #e3e3e3;
+    --chip-bg: #222;
+    --chip-fg: #fff;
+    --code-bg: #f6f6f4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+    background: #fff;
+    padding: 0 1.25rem;
+  }
+  .page { max-width: 900px; margin: 0 auto; padding: 3rem 0 4rem; }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.25;
+    margin-bottom: 1.2rem;
+  }
+  .authors { text-align: center; font-size: 1.05rem; margin-bottom: .35rem; }
+  .authors a { color: var(--accent); text-decoration: none; }
+  .authors sup { color: var(--muted); }
+  .affil { text-align: center; color: var(--muted); font-size: .92rem; margin-bottom: .35rem; }
+  .venue { text-align: center; color: var(--muted); font-size: .95rem; margin-bottom: 1.6rem; }
+  .buttons { display: flex; flex-wrap: wrap; gap: .55rem; justify-content: center; margin-bottom: 2.2rem; }
+  .btn {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: var(--chip-bg); color: var(--chip-fg);
+    border-radius: 999px; padding: .5rem 1.1rem;
+    font-size: .95rem; text-decoration: none;
+    transition: background .15s;
+  }
+  .btn:hover { background: var(--accent-dark); }
+  .btn svg { width: 1em; height: 1em; fill: currentColor; }
+  .video-wrap {
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    border-radius: 10px; overflow: hidden; background: #000;
+    margin-bottom: 2.4rem; box-shadow: 0 8px 28px rgba(0,0,0,.14);
+  }
+  .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.45rem; font-weight: 600;
+    margin: 2.4rem 0 .8rem;
+    padding-top: 1.2rem; border-top: 1px solid var(--rule);
+  }
+  p { margin-bottom: .9rem; }
+  .abstract p { text-align: justify; }
+  figure { margin: 1.4rem 0 1.8rem; }
+  figure img { width: 100%; height: auto; border-radius: 6px; }
+  figcaption { font-size: .88rem; color: var(--muted); margin-top: .55rem; text-align: justify; }
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: .8rem; margin: 1.4rem 0 1.8rem;
+  }
+  .clips { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.4rem 0 1.8rem; }
+  .clip { margin: 0; }
+  .clip.featured { grid-column: 1 / -1; }
+  .clip video {
+    width: 100%; height: auto; display: block;
+    border-radius: 8px; background: #000;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  }
+  .clip figcaption { font-size: .86rem; color: var(--muted); margin-top: .45rem; text-align: left; }
+  @media (max-width: 640px) { .clips { grid-template-columns: 1fr; } }
+  .stat {
+    border: 1px solid var(--rule); border-radius: 8px;
+    padding: .85rem .7rem; text-align: center;
+  }
+  .stat b { display: block; font-size: 1.35rem; color: var(--accent); }
+  .stat span { font-size: .82rem; color: var(--muted); line-height: 1.3; display: block; margin-top: .15rem; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--rule); border-radius: 8px;
+    padding: 1rem; overflow-x: auto; font-size: .84rem; line-height: 1.5;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  .bibtex-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+  .copy-btn {
+    font-size: .8rem; background: none; border: 1px solid var(--rule);
+    border-radius: 6px; padding: .25rem .7rem; cursor: pointer; color: var(--muted);
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .license { font-size: .9rem; color: var(--muted); }
+  footer {
+    margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--rule);
+    font-size: .85rem; color: var(--muted); text-align: center;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>RAPT: Model-Predictive Out-of-Distribution Detection and Failure Diagnosis for Sim-to-Real Humanoid Deployment</h1>
+
+  <p class="authors">
+    Humphrey Munn<sup>1,2</sup> &nbsp;·&nbsp;
+    Brendan Tidd<sup>2</sup> &nbsp;·&nbsp;
+    Peter Böhm<sup>1,2</sup> &nbsp;·&nbsp;
+    Marcus Gallagher<sup>1</sup> &nbsp;·&nbsp;
+    David Howard<sup>2</sup>
+  </p>
+  <p class="affil"><sup>1</sup>The University of Queensland &nbsp;&nbsp; <sup>2</sup>CSIRO Robotics, Data61</p>
+  <p class="venue">arXiv preprint 2602.01515 · February 2026</p>
+
+  <div class="buttons">
+    <a class="btn" href="https://arxiv.org/abs/2602.01515">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+      Paper</a>
+    <a class="btn" href="https://arxiv.org/pdf/2602.01515">
+      <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/></svg>
+      PDF</a>
+    <a class="btn" href="https://github.com/humphreymunn/RAPT">
+      <svg viewBox="0 0 24 24"><path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.49 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .5z"/></svg>
+      Code</a>
+    <a class="btn" href="https://www.youtube.com/watch?v=nAW1QfHK9ic">
+      <svg viewBox="0 0 24 24"><path d="M10 8.64v6.72L15.27 12 10 8.64zM21.58 7.19a2.5 2.5 0 0 0-1.76-1.77C18.25 5 12 5 12 5s-6.25 0-7.82.42a2.5 2.5 0 0 0-1.76 1.77A26.2 26.2 0 0 0 2 12c0 1.6.14 3.2.42 4.81a2.5 2.5 0 0 0 1.76 1.77C5.75 19 12 19 12 19s6.25 0 7.82-.42a2.5 2.5 0 0 0 1.76-1.77c.28-1.6.42-3.2.42-4.81 0-1.6-.14-3.2-.42-4.81z"/></svg>
+      Video</a>
+    <a class="btn" href="https://huggingface.co/datasets/hmunn/rapt-g1-ood">
+      <svg viewBox="0 0 24 24"><path d="M12 2C7.58 2 4 3.79 4 6v12c0 2.21 3.58 4 8 4s8-1.79 8-4V6c0-2.21-3.58-4-8-4zm0 2c3.87 0 6 1.5 6 2s-2.13 2-6 2-6-1.5-6-2 2.13-2 6-2zm6 14c0 .5-2.13 2-6 2s-6-1.5-6-2v-2.23C7.61 16.55 9.72 17 12 17s4.39-.45 6-1.23V18zm0-5c0 .5-2.13 2-6 2s-6-1.5-6-2V8.77C7.61 9.55 9.72 10 12 10s4.39-.45 6-1.23V13z"/></svg>
+      Dataset</a>
+    <a class="btn" href="#bibtex">
+      <svg viewBox="0 0 24 24"><path d="M9 7h6v2H9zm0 4h6v2H9zm0 4h4v2H9zM5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      BibTeX</a>
+  </div>
+
+  <div class="video-wrap">
+    <iframe src="https://www.youtube-nocookie.com/embed/nAW1QfHK9ic" title="RAPT overview video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+
+  <h2>Abstract</h2>
+  <div class="abstract">
+    <p>Deploying learned control policies is risky because policies that appear robust in simulation can confidently enter out-of-distribution (OOD) states after Sim-to-Real transfer, causing silent failures and potential hardware damage. Existing anomaly detectors often fail to meet the combined requirements of high-rate control, extremely low false-positive rates, and interpretable failure feedback.</p>
+    <p>We present <b>RAPT</b> (Recurrent Anomaly Probabilistic Trajectory Model), a lightweight, self-supervised 50&thinsp;Hz deployment monitor that learns nominal execution from large-scale simulation and produces calibrated, per-dimension predictive-deviation signals online. RAPT enables OOD detection under strict false-positive constraints while localizing <em>when and where</em> real execution departs from nominal behavior. For post-hoc diagnosis, RAPT combines temporal saliency, joint-kinematic summaries, and LLM-based semantic reasoning to classify likely failure causes in a zero-shot setting.</p>
+    <p>In simulation across four Isaac Lab tasks, RAPT improves TPR by 37% over the strongest baseline at 0.5% episode-level FPR; on hardware, it achieves 89% TPR across 78 trials with fewer false positives than high-frequency-compatible baselines, and reaches 75% semantic failure diagnosis accuracy across 21 categories on a challenging OOD subset.</p>
+  </div>
+
+  <h2>Method</h2>
+  <p>A residual state encoder, recurrent latent bridge, and probabilistic decoder model nominal trajectories with a heteroscedastic Gaussian likelihood. At deployment, the per-dimension negative log-likelihood feeds three calibrated statistical gates — a per-dimension spike gate, a global drift gate, and a physical range gate — evaluated in ~1.6&thinsp;ms per control step. Thresholds are calibrated on a nominal batch from simulation, or from a brief verified real-world run to absorb static deployment offsets. When a detection fires, integrated gradients through time localize which observation dimensions drove the anomaly and when, and a multimodal LLM classifies the physical root cause from a fixed 21-class failure taxonomy.</p>
+  <figure>
+    <img src="method_figure.png" alt="RAPT architecture, hierarchical OOD detection pipeline, and diagnosis pipeline">
+    <figcaption><b>(A)</b> RAPT OOD-detection architecture. <b>(B)</b> Hierarchical OOD pipeline using three statistical gates for real-time (~1.6&thinsp;ms) monitoring. <b>(C)</b> Detected anomalies trigger gradient-based saliency generation for zero-shot diagnosis via a multimodal LLM.</figcaption>
+  </figure>
+
+  <h2>Results</h2>
+  <div class="stats">
+    <div class="stat"><b>0.92</b><span>AUROC in simulation (4 tasks, 5 seeds)</span></div>
+    <div class="stat"><b>+37%</b><span>TPR over strongest baseline @ 0.5% FPR</span></div>
+    <div class="stat"><b>56&thinsp;/&thinsp;63</b><span>real-world anomalous trials detected (88.9% TPR)</span></div>
+    <div class="stat"><b>1 FP</b><span>in over an hour of nominal operation (15 trials)</span></div>
+    <div class="stat"><b>1.6&thinsp;ms</b><span>per 50&thinsp;Hz control step</span></div>
+    <div class="stat"><b>100%</b><span>top-3 root-cause accuracy with visual keyframe</span></div>
+  </div>
+
+  <h3 style="font-family: Georgia, serif; font-weight: 600; margin: 1.6rem 0 .6rem;">Real-world highlights</h3>
+  <div class="clips">
+    <figure class="clip featured">
+      <video autoplay muted loop playsinline preload="metadata" src="clips/payload_saliency.mp4"></video>
+      <figcaption><b>Payload mismatch with live root-cause evidence.</b> An unmodelled 7.5&thinsp;kg payload causes the robot to stumble; RAPT's per-dimension error crosses the calibrated NLL threshold and stops the policy, while the top-K temporal saliency (left) localizes the responsible observation channels online.</figcaption>
+    </figure>
+    <figure class="clip">
+      <video autoplay muted loop playsinline preload="metadata" src="clips/nominal.mp4"></video>
+      <figcaption><b>Nominal operation (5×).</b> Continuous omni-directional walking with no false positives — one flag in over an hour of nominal trials overall.</figcaption>
+    </figure>
+    <figure class="clip">
+      <video autoplay muted loop playsinline preload="metadata" src="clips/collision.mp4"></video>
+      <figcaption><b>Collision.</b> The robot collides with an obstruction; RAPT detects the off-nominal contact and triggers a controlled safe fall.</figcaption>
+    </figure>
+    <figure class="clip">
+      <video autoplay muted loop playsinline preload="metadata" src="clips/deformable.mp4"></video>
+      <figcaption><b>Deformable ground.</b> Stepping onto an unmodelled soft mattress is flagged from proprioception alone.</figcaption>
+    </figure>
+    <figure class="clip">
+      <video autoplay muted loop playsinline preload="metadata" src="clips/recovery.mp4"></video>
+      <figcaption><b>Safety response.</b> On detection, RAPT can trigger a predefined behavior — here, walking back away from the anomaly.</figcaption>
+    </figure>
+  </div>
+
+  <figure>
+    <img src="rapt_fig1.png" alt="Real-world OOD scenarios: policy latency, strong push, collision, deformable ground — each detected and met with a safety response">
+    <figcaption>RAPT detects diverse real-world out-of-distribution events on a Unitree G1 — policy latency, strong pushes, collisions, deformable ground — and triggers predefined safety responses (safe stop, safe fall, walk-away recovery) before hardware damage occurs.</figcaption>
+  </figure>
+
+  <h2>Dataset</h2>
+  <p>The G1 simulation OOD benchmark used for evaluation is available on
+  HuggingFace: <a href="https://huggingface.co/datasets/hmunn/rapt-g1-ood">hmunn/rapt-g1-ood</a>
+  — nominal training episodes, dedicated calibration splits, and labeled test
+  sequences spanning all 14 OOD categories for velocity tracking and both
+  motion-mimicry tasks (~1.6&thinsp;GB, float16). Loading snippets, the data
+  format, and single-command benchmarking live in the
+  <a href="https://github.com/humphreymunn/RAPT">code release</a>.</p>
+
+  <h2 id="bibtex">Citation</h2>
+  <div class="bibtex-head">
+    <p>If you find RAPT useful, please cite:</p>
+    <button class="copy-btn" onclick="copyBib(this)">Copy</button>
+  </div>
+<pre id="bib">@article{munn2026rapt,
+  title   = {RAPT: Model-Predictive Out-of-Distribution Detection and Failure
+             Diagnosis for Sim-to-Real Humanoid Deployment},
+  author  = {Munn, Humphrey and Tidd, Brendan and B{\"o}hm, Peter and
+             Gallagher, Marcus and Howard, David},
+  journal = {arXiv preprint arXiv:2602.01515},
+  year    = {2026}
+}</pre>
+
+  <h2>License</h2>
+  <p class="license">The paper is distributed under the <a href="https://arxiv.org/licenses/nonexclusive-distrib/1.0/license.html">arXiv.org perpetual non-exclusive license</a> (arXiv:2602.01515v1). The <a href="https://github.com/humphreymunn/RAPT">code release</a> is available under the BSD 3-Clause License.</p>
+
+  <footer>
+    <a href="https://arxiv.org/abs/2602.01515">arXiv</a> ·
+    <a href="https://github.com/humphreymunn/RAPT">Code</a> ·
+    <a href="https://www.youtube.com/watch?v=nAW1QfHK9ic">Video</a> ·
+    <a href="https://huggingface.co/datasets/hmunn/rapt-g1-ood">Dataset</a><br>
+    © 2026 the authors.
+  </footer>
+</div>
+
+<script>
+function copyBib(btn) {
+  navigator.clipboard.writeText(document.getElementById('bib').textContent).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+  });
+}
+</script>
+</body>
+</html>
